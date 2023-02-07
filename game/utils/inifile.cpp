@@ -1,11 +1,16 @@
 #include "inifile.h"
 
 #include <Tempest/Log>
+#include <Tempest/TextCodec>
 #include <cstring>
 #include <sstream>
 #include <cctype>
 
 #include "utils/fileutil.h"
+
+#ifdef __APPLE__
+#include "../msputils.h"
+#endif
 
 using namespace Tempest;
 
@@ -26,7 +31,11 @@ static bool compareNoCase(std::string_view a, std::string_view b) {
   }
 
 IniFile::IniFile(std::u16string_view file) {
+#ifdef __APPLE__
+  fileName = Tempest::TextCodec::toUtf16(std::string(getAppSupportDirectory("OpenGothic"))) + u"/" + std::u16string(file);
+#else
   fileName = std::u16string(file);
+#endif
   if(!FileUtil::exists(fileName)) {
     Log::e("no *.ini file in path - using default settings");
     return;

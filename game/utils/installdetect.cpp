@@ -1,11 +1,16 @@
 #include "installdetect.h"
 
 #include <Tempest/Platform>
+#include <Tempest/TextCodec>
 
 #ifdef __WINDOWS__
 #include "windows.h"
 #include "shlobj.h"
 #include "shlwapi.h"
+#endif
+
+#ifdef __APPLE__
+#include "../msputils.h"
 #endif
 
 #include <cstring>
@@ -16,6 +21,11 @@ InstallDetect::InstallDetect() {
   pfiles    = programFiles(false);
   pfilesX86 = programFiles(true);
 #endif
+
+#ifdef __APPLE__
+  pfiles    = applicationSupport();
+#endif
+
   }
 
 std::u16string InstallDetect::detectG2() {
@@ -34,6 +44,10 @@ std::u16string InstallDetect::detectG2(std::u16string pfiles) {
   auto akela = pfiles+u"/Akella Games/Gothic II/";
   if(FileUtil::exists(akela))
     return akela;
+#if defined(__APPLE__)
+  if(FileUtil::exists(pfiles))
+    return pfiles;
+#endif
   return u"";
   }
 
@@ -48,6 +62,15 @@ std::u16string InstallDetect::programFiles(bool x86) {
 
   ret.resize(len);
   std::memcpy(&ret[0],path,len*sizeof(char16_t));
+  return ret;
+  }
+#endif
+
+
+#ifdef __APPLE__
+std::u16string InstallDetect::applicationSupport() {
+  std::u16string ret; 
+  ret = Tempest::TextCodec::toUtf16(std::string(getAppSupportDirectory("OpenGothic")));
   return ret;
   }
 #endif

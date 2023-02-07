@@ -19,6 +19,10 @@
 #include "resources.h"
 #include "build.h"
 
+#ifdef __APPLE__
+#include "../msputils.h"
+#endif
+
 using namespace Tempest;
 
 static const float scriptDiv=8192.0f;
@@ -264,7 +268,7 @@ GameMenu::GameMenu(MenuRoot &owner, KeyCodec& keyCodec, phoenix::vm &vm, std::st
   timer.timeout.bind(this,&GameMenu::onTick);
   timer.start(100);
 
-  textBuf.reserve(64);
+  textBuf.reserve(128);
 
   auto* menuSectionSymbol = vm.find_symbol_by_name(menuSection);
   if (menuSectionSymbol != nullptr) {
@@ -860,7 +864,12 @@ void GameMenu::execSaveGame(const GameMenu::Item& item) {
   if(id==size_t(-1))
     return;
 
+#ifdef __APPLE__
+  string_frm fname(getAppSupportDirectory("OpenGothic"),"/save_slot_",int(id),".sav");
+    Tempest::Log::i("execSaveGame: ", fname);
+#else
   string_frm fname("save_slot_",int(id),".sav");
+#endif
   Gothic::inst().save(fname,item.handle->text[0]);
   }
 
@@ -870,8 +879,13 @@ void GameMenu::execLoadGame(const GameMenu::Item &item) {
     return;
 
   //string_frm fname("save_slot_",int(id),".sav");
-  char fname[64]={};
+  char fname[128]={};
+#ifdef __APPLE__
+  std::snprintf(fname,sizeof(fname)-1,"%s/save_slot_%d.sav",getAppSupportDirectory("OpenGothic"), int(id));
+    Tempest::Log::i("execLoadGame: ", fname);
+#else
   std::snprintf(fname,sizeof(fname)-1,"save_slot_%d.sav",int(id));
+#endif
   if(!FileUtil::exists(TextCodec::toUtf16(fname)))
     return;
   Gothic::inst().load(fname);
@@ -929,8 +943,13 @@ void GameMenu::updateSavTitle(GameMenu::Item& sel) {
   if(id==size_t(-1))
     return;
 
-  char fname[64]={};
+  char fname[128]={};
+#ifdef __APPLE__
+  std::snprintf(fname,sizeof(fname)-1,"%s/save_slot_%d.sav",getAppSupportDirectory("OpenGothic"), int(id));
+    Tempest::Log::i("updateSavTitle: ", fname);
+#else
   std::snprintf(fname,sizeof(fname)-1,"save_slot_%d.sav",int(id));
+#endif
 
   if(!FileUtil::exists(TextCodec::toUtf16(fname))) {
     sel.handle->text[0] = "---";
@@ -996,14 +1015,19 @@ bool GameMenu::implUpdateSavThumb(GameMenu::Item& sel) {
   if(id==size_t(-1))
     return false;
 
-  char fname[64]={};
+  char fname[128]={};
+#ifdef __APPLE__
+  std::snprintf(fname,sizeof(fname)-1,"%s/save_slot_%d.sav",getAppSupportDirectory("OpenGothic"), int(id));
+    Tempest::Log::i("implUpdateSavThumb: ", fname);
+#else
   std::snprintf(fname,sizeof(fname)-1,"save_slot_%d.sav",int(id));
+#endif
 
   if(!FileUtil::exists(TextCodec::toUtf16(fname)))
     return false;
 
   const SaveGameHeader& hdr = sel.savHdr;
-  char form[64]={};
+  char form[128]={};
   Resources::device().waitIdle();
   savThumb = Resources::loadTexturePm(sel.savPriview);
 
@@ -1139,7 +1163,7 @@ void GameMenu::updateValues() {
       i.handle->text[0] = std::to_string(time.day());
       }
     if(i.name=="MENU_ITEM_TIME") {
-      char form[64]={};
+      char form[128]={};
       std::snprintf(form,sizeof(form),"%d:%02d",int(time.hour()),int(time.minute()));
       i.handle->text[0] = form;
       }

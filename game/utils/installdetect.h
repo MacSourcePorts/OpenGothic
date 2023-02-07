@@ -15,5 +15,8 @@ class InstallDetect final {
 #ifdef __WINDOWS__
     std::u16string programFiles(bool x86);
 #endif
+#ifdef __APPLE__
+    std::u16string applicationSupport();
+#endif
     std::u16string pfiles, pfilesX86;
   };

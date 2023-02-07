@@ -8,10 +8,6 @@
 #include "utils/fileutil.h"
 #include "utils/string_frm.h"
 
-#if defined(__APPLE__)
-#include "msputils.h"
-#endif
-
 using namespace Tempest;
 using namespace FileUtil;
 
@@ -88,10 +84,6 @@ CommandLine::CommandLine(int argc, const char** argv) {
   for(auto& i:gpath)
     if(i=='\\')
       i='/';
-
-#if defined(__APPLE__)
-  gpath = TextCodec::toUtf16(std::string(getAppSupportDirectory("OpenGothic")));
-#endif
 
   if(gpath.size()>0 && gpath.back()!='/')
     gpath.push_back('/');
