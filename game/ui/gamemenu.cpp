@@ -864,11 +864,12 @@ void GameMenu::execSaveGame(const GameMenu::Item& item) {
   if(id==size_t(-1))
     return;
 
+  char fname[128]={};
 #ifdef __APPLE__
-  string_frm fname(getAppSupportDirectory("OpenGothic"),"/save_slot_",int(id),".sav");
+  std::snprintf(fname,sizeof(fname)-1,"%s/save_slot_%d.sav",getAppSupportDirectory("OpenGothic"), int(id));
     Tempest::Log::i("execSaveGame: ", fname);
 #else
-  string_frm fname("save_slot_",int(id),".sav");
+  std::snprintf(fname,sizeof(fname)-1,"save_slot_%d.sav",int(id));
 #endif
   Gothic::inst().save(fname,item.handle->text[0]);
   }
